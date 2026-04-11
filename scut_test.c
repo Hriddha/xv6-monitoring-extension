@@ -5,7 +5,7 @@
 
 int main(void){
 
-    print(1, "System Call Usage Tracker Test Initialized");
+    printf(1, "System Call Usage Tracker Test Initialized");
 
     //Check current count for getpid
     int start = getcounts(SYS_getpid);
