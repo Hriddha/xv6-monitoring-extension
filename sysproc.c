@@ -8,9 +8,6 @@
 #include "proc.h"
 
 
-extern struct spinlock scutlock;
-extern int global_counts[30];
-
 int
 sys_fork(void)
 {
@@ -61,21 +58,31 @@ sys_sbrk(void)
 }
 
 //Implemented the get sys_getcounts(void) function
-int sys_getcounts(void) {
+extern struct spinlock scutlock;
+extern int global_counts[30];
+
+int
+sys_getcounts(void)
+{
   int sys_id;
-  // GLOBAL MODE: If user passes a negative ID (e.g., -SYS_fork)
+  
+  // THIS IS THE MISSING LINE:
+  if(argint(0, &sys_id) < 0)
+    return -1;
+
+  // GLOBAL MODE
   if(sys_id < 0) {
     int positive_id = -sys_id;
     if(positive_id >= 30) return -1;
     
     int val;
-    acquire(&scutlock);   // Protect the global data while reading
+    acquire(&scutlock);
     val = global_counts[positive_id];
     release(&scutlock);
     return val;
   }
 
-  // LOCAL MODE: Standard tracking for the current process
+  // LOCAL MODE
   if(sys_id >= 30) return -1;
   return myproc()->syscall_counts[sys_id];
 }
