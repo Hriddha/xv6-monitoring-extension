@@ -56,6 +56,14 @@ sys_sbrk(void)
   return addr;
 }
 
+//Implemented the get sys_getcounts(void) function
+int sys_getcounts(void) {
+  int sys_id;
+  if(argint(0, &sys_id) < 0) return -1;
+  if(sys_id < 0 || sys_id >= 30) return -1; // Bounds check
+  return myproc()->syscall_counts[sys_id];
+}
+
 int
 sys_sleep(void)
 {
