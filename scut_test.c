@@ -17,7 +17,7 @@ int main(void){
     getpid();
     getpid();
 
-    int end = getcounts(SYS_getpid);
+    int end = getcounts(SYS_getpid);//Checking the count again
     printf(1, "Final getpid calls: %d\n", end);
 
   
