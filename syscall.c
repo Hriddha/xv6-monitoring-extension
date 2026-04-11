@@ -7,6 +7,9 @@
 #include "x86.h"
 #include "syscall.h"
 
+struct spinlock scutlock; // Define the lock
+int global_counts[30];    // Global totals
+
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
 // Arguments on the stack, from the user call to the C
@@ -132,8 +135,6 @@ static int (*syscalls[])(void) = {
 
 
 
-struct spinlock scutlock; // Define the lock
-int global_counts[30];    // Global totals
 
 void syscallinit(void) {
   initlock(&scutlock, "scut"); // Initialize the lock on boot
