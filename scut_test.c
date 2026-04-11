@@ -17,7 +17,7 @@ int main(void) {
   printf(1, "Local getpid calls: %d\n", local_end - local_start);
 
   // 2. Global Tracking
-  int global_start = getcounts(-SYS_getpid); // The variable causing the error
+  int global_start = getcounts(-SYS_getpid); 
   
   getpid(); 
   
