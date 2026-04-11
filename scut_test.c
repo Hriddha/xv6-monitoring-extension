@@ -2,7 +2,10 @@
 #include "stat.h"
 #include "user.h"
 #include "syscall.h"
-
+/* * Feature: Kernel Telemetry & Audit Suite (KTAS)
+ * Author: Rudra Saha
+ * Implementation: Multi-core synchronized tracking with process inheritance.
+ */
 int main(void) {
   printf(1, "--- ADVANCED SCUT TEST ---\n");
 
