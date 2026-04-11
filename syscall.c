@@ -5,6 +5,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "spinlock.h"
 #include "syscall.h"
 
 struct spinlock scutlock; // Define the lock
