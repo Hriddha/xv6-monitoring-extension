@@ -13,6 +13,7 @@
 #define SYS_sbrk   12
 #define SYS_sleep  13
 #define SYS_uptime 14
+#define SYS_getcounts 23
 #define SYS_open   15
 #define SYS_write  16
 #define SYS_mknod  17

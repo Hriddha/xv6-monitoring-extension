@@ -98,6 +98,7 @@ extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
 extern int sys_sbrk(void);
+extern int sys_getcounts(void); // my get_syscounts function
 extern int sys_sleep(void);
 extern int sys_unlink(void);
 extern int sys_wait(void);
@@ -122,6 +123,7 @@ static int (*syscalls[])(void) = {
 [SYS_open]    sys_open,
 [SYS_write]   sys_write,
 [SYS_mknod]   sys_mknod,
+[SYS_getcounts] sys_getcounts,
 [SYS_unlink]  sys_unlink,
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
