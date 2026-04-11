@@ -59,8 +59,13 @@ sys_sbrk(void)
 //Implemented the get sys_getcounts(void) function
 int sys_getcounts(void) {
   int sys_id;
-  if(argint(0, &sys_id) < 0) return -1;
-  if(sys_id < 0 || sys_id >= 30) return -1; // Bounds check
+  if(argint(0, &sys_id) < 0){
+    return -1;
+  } 
+  //Prevent user from passing an ID that crashes the kernel array
+  if(sys_id < 0 || sys_id >= 30){ 
+    return -1;
+  }; // Bounds check
   return myproc()->syscall_counts[sys_id];
 }
 
