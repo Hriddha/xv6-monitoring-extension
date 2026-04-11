@@ -23,7 +23,7 @@ int main(void) {
   
   int global_end = getcounts(-SYS_getpid);
 
-  // USE THE VARIABLE HERE TO FIX THE ERROR:
+  
   printf(1, "Global change: %d to %d\n", global_start, global_end);
   
   if (local_end - local_start == 2 && global_end > global_start) {
