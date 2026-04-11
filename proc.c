@@ -203,6 +203,13 @@ fork(void)
   }
   np->sz = curproc->sz;
   np->parent = curproc;
+
+  // This will syscall tracking history from parent to child
+  for(int i = 0; i < 30; i++) {
+    np->syscall_counts[i] = curproc->syscall_counts[i];
+  }
+
+
   *np->tf = *curproc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
