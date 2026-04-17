@@ -1,3 +1,4 @@
+//#include "proc.h"
 struct buf;
 struct context;
 struct file;
@@ -185,6 +186,7 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
-
+//#include "proc.h"
+//int                 getprocs(struct pstat *table, int max);
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
