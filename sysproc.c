@@ -120,3 +120,18 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+int getprocs(struct pstat *table, int max);
+int
+sys_getprocs(void)
+{
+    struct pstat *table;
+    int max;
+
+    // Fetch arguments from user space
+    if(argptr(0, (void*)&table, sizeof(*table)) < 0)
+        return -1;
+    if(argint(1, &max) < 0)
+        return -1;
+
+    return getprocs(table, max);
+}
