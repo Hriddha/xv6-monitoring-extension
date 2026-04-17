@@ -38,3 +38,5 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+struct pstat;
+int getprocs(struct pstat *table, int max);
