@@ -544,3 +544,30 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+getprocs(struct pstat *table, int max)
+{
+    struct proc *p;
+    int count = 0;
+
+    acquire(&ptable.lock);  // Lock the process table (thread safety)
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if(p->state == UNUSED)    // Skip empty slots
+            continue;
+        if(count >= max)          // Don't exceed array size
+            break;
+
+        // Copy safe info into pstat struct
+        table[count].pid   = p->pid;
+        table[count].state = p->state;
+        table[count].sz    = p->sz;
+        safestrcpy(table[count].name, p->name, sizeof(p->name));
+
+        count++;
+    }
+
+    release(&ptable.lock);  // Always release the lock!
+    return count;           // Return number of processes found
+}
