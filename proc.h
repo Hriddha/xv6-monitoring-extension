@@ -57,3 +57,11 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+// Structure to hold process info for ps command
+struct pstat {
+    int pid;                // Process ID
+    int state;              // Process state (0-5)
+    uint sz;                // Memory size in bytes
+    char name[16];          // Process name
+};
