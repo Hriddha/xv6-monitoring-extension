@@ -49,7 +49,10 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
+  char name[16];  
+  // Feature 3
+ int priority;      // 0 (highest) → 20 (lowest)
+ int wait_ticks;    // how long process waited             
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -64,4 +67,6 @@ struct pstat {
     int state;              // Process state (0-5)
     uint sz;                // Memory size in bytes
     char name[16];          // Process name
+    int priority;      // Feature 3: base priority (0-20)
+    int wait_ticks;    // Feature 3: current aging counter
 };

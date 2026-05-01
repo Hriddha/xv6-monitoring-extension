@@ -53,6 +53,7 @@ trap(struct trapframe *tf)
       ticks++;
       wakeup(&ticks);
       release(&tickslock);
+       agingupdate();   // Feature 3: age RUNNABLE processes every timer tick
     }
     lapiceoi();
     break;

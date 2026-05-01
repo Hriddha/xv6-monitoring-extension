@@ -11,4 +11,4 @@
 #define LOGSIZE      (MAXOPBLOCKS*3)  // max data blocks in on-disk log
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       1000  // size of file system in blocks
-
+#define AGING_INTERVAL  10   // timer ticks of waiting before 1 priority boost

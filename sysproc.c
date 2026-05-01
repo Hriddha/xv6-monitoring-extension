@@ -7,7 +7,6 @@
 #include "mmu.h"
 #include "proc.h"
 
-
 int
 sys_fork(void)
 {
@@ -18,7 +17,7 @@ int
 sys_exit(void)
 {
   exit();
-  return 0;  // not reached
+  return 0;
 }
 
 int
@@ -31,7 +30,6 @@ int
 sys_kill(void)
 {
   int pid;
-
   if(argint(0, &pid) < 0)
     return -1;
   return kill(pid);
@@ -48,7 +46,6 @@ sys_sbrk(void)
 {
   int addr;
   int n;
-
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
@@ -57,7 +54,6 @@ sys_sbrk(void)
   return addr;
 }
 
-//Implemented the get sys_getcounts(void) function
 extern struct spinlock scutlock;
 extern int global_counts[30];
 
@@ -65,16 +61,13 @@ int
 sys_getcounts(void)
 {
   int sys_id;
-  
-  // THIS IS THE MISSING LINE:
+
   if(argint(0, &sys_id) < 0)
     return -1;
 
-  // GLOBAL MODE
-  if(sys_id < 0) {
+  if(sys_id < 0){
     int positive_id = -sys_id;
     if(positive_id >= 30) return -1;
-    
     int val;
     acquire(&scutlock);
     val = global_counts[positive_id];
@@ -82,7 +75,6 @@ sys_getcounts(void)
     return val;
   }
 
-  // LOCAL MODE
   if(sys_id >= 30) return -1;
   return myproc()->syscall_counts[sys_id];
 }
@@ -92,7 +84,6 @@ sys_sleep(void)
 {
   int n;
   uint ticks0;
-
   if(argint(0, &n) < 0)
     return -1;
   acquire(&tickslock);
@@ -108,30 +99,43 @@ sys_sleep(void)
   return 0;
 }
 
-// return how many clock tick interrupts have occurred
-// since start.
 int
 sys_uptime(void)
 {
   uint xticks;
-
   acquire(&tickslock);
   xticks = ticks;
   release(&tickslock);
   return xticks;
 }
+
 int getprocs(struct pstat *table, int max);
+
 int
 sys_getprocs(void)
 {
-    struct pstat *table;
-    int max;
+  struct pstat *table;
+  int max;
 
-    // Fetch arguments from user space
-    if(argptr(0, (void*)&table, sizeof(*table)) < 0)
-        return -1;
-    if(argint(1, &max) < 0)
-        return -1;
+  // Fetch max first so we can use it in argptr
+  if(argint(1, &max) < 0)
+    return -1;
+  if(argptr(0, (void*)&table, sizeof(struct pstat) * max) < 0)
+    return -1;
 
-    return getprocs(table, max);
+  return getprocs(table, max);
+}
+
+int
+sys_setpriority(void)
+{
+  int pid, priority;
+
+  if(argint(0, &pid) < 0 || argint(1, &priority) < 0)
+    return -1;
+
+  if(priority < 0 || priority > 20)
+    return -1;
+
+  return setpriority(pid, priority);   // calls proc.c function, no ptable access here
 }

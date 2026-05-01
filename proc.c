@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -88,6 +89,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority   = 10;   // default mid-level priority
+  p->wait_ticks = 0;    // no aging accumulated yet
 
   //Initialize syscall counts to 0
     for(int i = 0; i < 30; i++) {
@@ -335,38 +338,49 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *chosen;
+  int eff, best_eff;
   struct cpu *c = mycpu();
   c->proc = 0;
-  
+
   for(;;){
-    // Enable interrupts on this processor.
     sti();
 
-    // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+    // Find the RUNNABLE process with the best effective priority
+    chosen   = 0;
+    best_eff = 21;   // worse than any valid priority (max is 20)
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+      // Aging formula: longer wait = lower effective priority number = runs sooner
+      eff = p->priority - (p->wait_ticks / AGING_INTERVAL);
+      if(eff < 0) eff = 0;   // floor at 0, can't go better than best
 
-      swtch(&(c->scheduler), p->context);
+      if(chosen == 0 || eff < best_eff){
+        best_eff = eff;
+        chosen   = p;
+      }
+    }
+
+    // Run the chosen process
+    if(chosen != 0){
+      chosen->wait_ticks = 0;   // reset aging — it got its turn
+
+      c->proc = chosen;
+      switchuvm(chosen);
+      chosen->state = RUNNING;
+      swtch(&(c->scheduler), chosen->context);
       switchkvm();
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
       c->proc = 0;
     }
-    release(&ptable.lock);
 
+    release(&ptable.lock);
   }
 }
-
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
 // intena because intena is a property of this
@@ -472,8 +486,10 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
-      p->state = RUNNABLE;
+    if(p->state == SLEEPING && p->chan == chan){
+      p->state      = RUNNABLE;
+      p->wait_ticks = 0;   // fresh start — don't carry aging from before sleep
+    }
 }
 
 // Wake up all processes sleeping on chan.
@@ -563,6 +579,8 @@ getprocs(struct pstat *table, int max)
         table[count].pid   = p->pid;
         table[count].state = p->state;
         table[count].sz    = p->sz;
+        table[count].priority   = p->priority;    // add this
+        table[count].wait_ticks = p->wait_ticks;  // add this
         safestrcpy(table[count].name, p->name, sizeof(p->name));
 
         count++;
@@ -570,4 +588,41 @@ getprocs(struct pstat *table, int max)
 
     release(&ptable.lock);  // Always release the lock!
     return count;           // Return number of processes found
+}
+// Called from trap.c on every timer tick.
+// Increments wait_ticks for every RUNNABLE process.
+// The scheduler resets wait_ticks to 0 when it actually runs a process.
+void
+agingupdate(void)
+{
+  struct proc *p;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == RUNNABLE)
+      p->wait_ticks++;
+  }
+  release(&ptable.lock);
+}
+int
+setpriority(int pid, int priority)
+{
+  struct proc *p;
+  int found = 0;
+
+  if(priority < 0 || priority > 20)
+    return -1;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->priority   = priority;
+      p->wait_ticks = 0;
+      found = 1;
+      break;
+    }
+  }
+  release(&ptable.lock);
+
+  return found ? 0 : -1;
 }
